@@ -1,10 +1,10 @@
 {
-  "Name": "Farmer Vitals Evolved",
-  "Author": "Sensakuma",
-  "Version": "1.0.0",
-  "Description": "Customizable health and stamina progression.",
-  "UniqueID": "sensakuma.farmervitalsevolved",
-  "EntryDll": "FarmerVitalsEvolved.dll",
-  "MinimumApiVersion": "3.0.0",
-  "UpdateKeys": [ "Nexus:11131" ]
+  "Name": "FarmerVitalsReWrite",
+  "Author": "BriannaTheBrave",
+  "Version": "0.0.1",
+  "Description": "Customizable health and stamina progression",
+  "UniqueID": "BriannaTheBrave.FarmerVitalsReWrite",
+  "EntryDll": "FarmerVitalsReWrite.dll",
+  "MinimumApiVersion": "4.0.0",
+  "UpdateKeys": []
 }
