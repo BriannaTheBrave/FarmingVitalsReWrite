@@ -1,8 +1,9 @@
-﻿using StardewModdingAPI;
+﻿using Netcode;
+using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 
-namespace FarmerVitalsEvolved
+namespace FarmerVitalsReWrite
 {
 	public class ModEntry : Mod
 	{
@@ -86,15 +87,17 @@ namespace FarmerVitalsEvolved
 				CalculateProfessionVitals();
 			}
 
-			vitalsMaxHealth = newMaxHealth - removeVanillaHealth;
+			vitalsMaxHealth = newMaxHealth - removeVanillaHealth; //why bother to include/remove VanillaHealth, and then do += below???
 			vitalsMaxStamina = newMaxStamina - removeVanillaStamina;
 			VitalsSummary();
 		}
 
 		private void ApplyNewMaxVitals()
 		{
-			Game1.player.maxHealth += vitalsMaxHealth;
-			Game1.player.MaxStamina += vitalsMaxStamina;
+            Game1.player.maxHealth += vitalsMaxHealth;
+			//IReflectedField<NetInt> playerMaxStam = this.Helper.Reflection.GetField<NetInt>(typeof(Farmer), "maxStamina");
+			//playerMaxStam.SetValue(Game1.player.maxStamina + vitalsMaxStamina);
+			Game1.player.maxStamina.Value += vitalsMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina." , (LogLevel)debugVal);
 		}
 
@@ -114,7 +117,7 @@ namespace FarmerVitalsEvolved
 		{
             Monitor.Log("Removing Vitals before saving...", (LogLevel)debugVal);
 			Game1.player.maxHealth -= vitalsMaxHealth;
-			Game1.player.MaxStamina -= vitalsMaxStamina;
+			Game1.player.maxStamina.Value -= vitalsMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina.", (LogLevel)debugVal);
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -799,7 +802,7 @@ namespace FarmerVitalsEvolved
 				getValue: () => Config.exhaustedLoss,
 				setValue: value => Config.exhaustedLoss = value
 			);
-			// LATE PENALTY INTERVAL
+			/*// LATE PENALTY INTERVAL
 			configMenu.AddNumberOption(
 				mod: ModManifest,
 				name: () => "Late Penalty % Interval",
@@ -809,7 +812,7 @@ namespace FarmerVitalsEvolved
 				interval: 0.5f,
 				getValue: () => Config.latePenaltyInterval,
 				setValue: value => Config.latePenaltyInterval = value
-			);
+			);*/
 		}
 	}
 }
