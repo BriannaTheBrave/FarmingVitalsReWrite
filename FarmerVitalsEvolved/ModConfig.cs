@@ -1,5 +1,5 @@
 ﻿
-namespace FarmerVitalsEvolved
+namespace FarmerVitalsReWrite
 {
 	internal class ModConfig
 	{

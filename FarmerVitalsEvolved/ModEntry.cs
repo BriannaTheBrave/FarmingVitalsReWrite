@@ -3,7 +3,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 
-namespace FarmerVitalsEvolved
+namespace FarmerVitalsReWrite
 {
 	public class ModEntry : Mod
 	{
