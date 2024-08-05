@@ -1,5 +1,7 @@
 Forked from https://github.com/Sensakuma/StardewModding
+
 Does not have any direct permission from original authors
+
 Permissions indicated on Nexus https://www.nexusmods.com/stardewvalley/mods/11131?tab=description include 
 
     Credits and distribution permission
