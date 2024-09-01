@@ -1,5 +1,7 @@
 Forked from https://github.com/Sensakuma/StardewModding
+
 Does not have any direct permission from original authors
+
 Permissions indicated on Nexus https://www.nexusmods.com/stardewvalley/mods/11131?tab=description include 
 
     Credits and distribution permission
@@ -23,6 +25,7 @@ Permissions indicated on Nexus https://www.nexusmods.com/stardewvalley/mods/1113
     This mod is not opted-in to receive Donation Points
 
 This is a rewrite for the Stardew Valley 1.6 release for non-commercial use.
+
 I just want to roleplay being a paper-pushing desk worker who starts weak and becomes strong through hard work and dedication.
 
 By: BriannaTheBrave
