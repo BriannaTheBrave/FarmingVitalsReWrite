@@ -2,6 +2,7 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
+using System;
 
 namespace FarmerVitalsReWrite
 {
@@ -17,7 +18,7 @@ namespace FarmerVitalsReWrite
 		private int vitalsMaxHealth;
 		private int vitalsMaxStamina;
 		private int savedHealth;
-		private int savedStamina;
+		private float savedStamina;
 
 		private const int vanillaMaxHealth = 100;
 		private const int vanillaMaxStamina = 270;
@@ -37,6 +38,7 @@ namespace FarmerVitalsReWrite
 			helper.Events.GameLoop.DayEnding += OnDayEnding;
 			helper.Events.GameLoop.Saving += OnSaving;
 			helper.Events.GameLoop.DayStarted += OnDayStarted;
+			//TODO could try to catch the pass out event to store more data about when time went to sleep vs time went to bed (0 if passout, but cant ref. time went to sleep?)
 		}
 
 		public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -52,19 +54,22 @@ namespace FarmerVitalsReWrite
             Monitor.Log("New Day, Calculating Vitals...", (LogLevel)(debugVal*2));
 			CalculateMaxVitals();
 			ApplyNewMaxVitals();
-			ApplyVitals();
+			//ApplyVitals(); //TODO dont need this anymore 
 		}
 
 		private void OnDayEnding(object sender, DayEndingEventArgs e)
 		{
 			WorldReadyCheck();
-			SaveCurrentVitals();
+			ApplyVitalsSleepLogic(); //we do sleep logic here when we have access to all the values like the game does
+			RetainCurrentVitalsForSave(); //we store values for saving - vanilla game logic will always stomp on our logic otherwise
 			RevertMaxVitals();
 		}
 
 		private void OnSaving(object sender, SavingEventArgs e)
         {
-			PersistVitals();
+			SaveVitals(); //we cleverly overwrite the game state with our stored values to get them in our save!
+			// NOTE this means that changing max values up via config or even removing this mod will result in these saved values being the ones for your next day.
+			// Sorry buddy, you gotta go one day with (prolly) less stamina to remove this mod (or make adjustments)
 
 		}
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -87,7 +92,7 @@ namespace FarmerVitalsReWrite
 				CalculateProfessionVitals();
 			}
 
-			vitalsMaxHealth = newMaxHealth - removeVanillaHealth; //why bother to include/remove VanillaHealth, and then do += below???
+			vitalsMaxHealth = newMaxHealth - removeVanillaHealth; //all this logic seems weird, but it exists to ensure config for enables can be on or off!
 			vitalsMaxStamina = newMaxStamina - removeVanillaStamina;
 			VitalsSummary();
 		}
@@ -95,14 +100,16 @@ namespace FarmerVitalsReWrite
 		private void ApplyNewMaxVitals()
 		{
             Game1.player.maxHealth += vitalsMaxHealth;
-			//IReflectedField<NetInt> playerMaxStam = this.Helper.Reflection.GetField<NetInt>(typeof(Farmer), "maxStamina");
-			//playerMaxStam.SetValue(Game1.player.maxStamina + vitalsMaxStamina);
 			Game1.player.maxStamina.Value += vitalsMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina." , (LogLevel)debugVal);
 		}
 
-		private void ApplyVitals()
+		/*private void ApplyVitals()
 		{
+			if (Config.enableMod)
+			{
+
+			}
 			if (Config.enableSleepVitals)
             {
 				ApplySleepVitals();
@@ -111,7 +118,7 @@ namespace FarmerVitalsReWrite
             {
 				ApplyVanillaSleep();
             }
-		}
+		}*/
 
 		private void RevertMaxVitals()
 		{
@@ -140,7 +147,7 @@ namespace FarmerVitalsReWrite
 			{
 				int snakeMilkHealthGain = Config.snakeMilkHealthGain;
 				int snakeMilkStaminaGain = Config.snakeMilkStaminaGain;
-				newMaxHealth += snakeMilkHealthGain;
+				newMaxHealth += Config.snakeMilkHealthGain;
 				newMaxStamina += snakeMilkStaminaGain;
 				removeVanillaHealth += vanillaSnakeMilkHealth;
                 Monitor.Log("Iridium Snake Milk gave you " + snakeMilkHealthGain + " MaxHealth and, " + snakeMilkStaminaGain + " MaxStamina instead of " + vanillaSnakeMilkHealth + " MaxHealth.", (LogLevel)debugVal);
@@ -287,59 +294,155 @@ namespace FarmerVitalsReWrite
 			}
 		}
 
-		private void ApplySleepVitals()
+		/*private void ApplySleepVitals()
         {
-			if (Game1.player.health < Game1.player.maxHealth)
-            {
-				float healthPercent = Config.sleepHealthGain * 0.01f;
-				Game1.player.health += (int)(Game1.player.maxHealth * healthPercent);
-				if (Game1.player.health > Game1.player.maxHealth)
-                {
-					Game1.player.health = Game1.player.maxHealth;
-                }
-            }
-			if (Game1.player.stamina < Game1.player.MaxStamina)
-            {
-				float staminaPercent = Config.sleepStaminaGain * 0.01f;
-				Game1.player.stamina += Game1.player.MaxStamina * staminaPercent;
-				if (Game1.player.stamina > Game1.player.MaxStamina)
-                {
-					Game1.player.stamina = Game1.player.MaxStamina;
-                }
-			}
+			            
         }
 		private void ApplyVanillaSleep()
         {
+			// MISSING EXHAUSTION LOGIC
 			float staminaPercent = Game1.player.stamina / (Game1.player.MaxStamina - vitalsMaxStamina);
 			int staminaRestore = (int)(Game1.player.MaxStamina * staminaPercent);
 			Game1.player.health = Game1.player.maxHealth;
 			Game1.player.stamina = staminaRestore;
-		}
+		}*/
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////// MISC METHODS //////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-		private void SaveCurrentVitals()
-        {
-			if (Config.enableSleepVitals)
+		
+		private void ApplyVitalsSleepLogic()
+		{
+			// 1 Update Max
+			// we wanna get any new maximums since we need to do sleep logic and them gains should count! -- only thing is they will miss out on the fighter+defender bonus
+            CalculateMaxVitals();
+            ApplyNewMaxVitals();
+          
+            //need to do some testing to be sure about all this...
+            Monitor.Log("DEBUG - LOGIC Entering Ending night BEFORE processing with\n"
+                    + Game1.player.health + " Health\n" +
+                    Game1.player.stamina + " Stamina\n" +
+                    Game1.player.timeWentToBed.Value + "TimeWentToBed\n" +
+                    Game1.timeOfDay + " Current Time of Day\n" +
+                    Game1.player.exhausted.Value + " Played Exhausted?",
+                    (LogLevel)debugVal);
+
+			if (!Config.enableSleepVitals)
+			{
+				Game1.player.stamina = Game1.player.maxStamina.Value; // vanilla is recover max
+				if (Game1.player.timeWentToBed.Value == 0 || Game1.player.timeWentToBed.Value >= 2700) //if passed out
+				{
+					Game1.player.stamina = Game1.player.stamina * 0.5f;
+				}
+				if (Game1.player.exhausted.Value) // if exhausted
+				{
+					Game1.player.stamina = Game1.player.stamina * 0.5f;
+				}
+				// if that time is late, get a late penalty as a negative from 0 to -1 as a multiplier to 1/2 your max stamina as it gets later (approached -1 as later)
+				int num3 = (((int)Game1.player.timeWentToBed.Value == 0) ? Game1.timeOfDay : ((int)Game1.player.timeWentToBed.Value));
+				if (num3 > 2400)
+				{
+					float num4 = (1f - (float)(2600 - Math.Min(2600, num3)) / 200f) * (float)(Game1.player.MaxStamina / 2);
+					Game1.player.stamina -= num4;
+				}
+			} 
+			else //if using SleepVitals
+			{
+                // restore either normal or sleep penalized amount
+                int num3 = (((int)Game1.player.timeWentToBed.Value == 0) ? Game1.timeOfDay : ((int)Game1.player.timeWentToBed.Value));
+				float staminaRecoveryAmount = Game1.player.MaxStamina * (Config.sleepStaminaGain * 0.01f);
+                int healthRecoveryAmount = (int)Math.Ceiling(Game1.player.maxHealth * (Config.sleepHealthGain * 0.01f));
+                if (num3 > 2400) //if late penalty
+                {
+                    float latePenaltyFactor = (1f - (float)(2600 - Math.Min(2600, num3)) / 200f); // Percent of the penalty to apply, getting bigger as we get to 2am
+                    float exhaustedStaminaPenaltyFactor = (Config.exhaustedStaminaLoss * 0.01f); // Percentage you can lose
+					float resultingPenalty = 1f - (latePenaltyFactor * exhaustedStaminaPenaltyFactor); //Results in the percentage of the amount of total penalty to apply as a penalty. 
+                    Game1.player.stamina += staminaRecoveryAmount * resultingPenalty; //so recover the normal amount modified by a scaling amount of your penalty removed from 1f (ie 100% - penalty stuff)
+					if (Config.enableExhaustedHealth)
+					{
+                        float healthRecoveryAmountPrecise = Game1.player.maxHealth * (Config.sleepHealthGain * 0.01f);
+                        float exhaustedHealthPenaltyFactor = (Config.exhaustedHealthLoss * 0.01f); // Percentage you can lose
+						float resultingHealthPenalty = 1f - (latePenaltyFactor * exhaustedHealthPenaltyFactor);
+                        Game1.player.health += (int)Math.Ceiling(healthRecoveryAmountPrecise * resultingHealthPenalty);
+                    }
+
+                } 
+				else //no late penalty
+				{
+                    Game1.player.stamina += staminaRecoveryAmount;
+					Game1.player.health += healthRecoveryAmount;
+                }
+				float exhaustedStaminaPenalty = (1f - (Config.exhaustedStaminaLoss * 0.01f));
+                float exhaustedHealthPenalty = (1f - (Config.exhaustedHealthLoss * 0.01f));
+				if (Game1.player.timeWentToBed.Value == 0 || Game1.player.timeWentToBed.Value >= 2700) //if passed out
+				{
+					Game1.player.stamina = Game1.player.stamina * exhaustedStaminaPenalty;
+					if (Config.enableExhaustedHealth)
+					{
+						Game1.player.health = (int)Math.Ceiling(Game1.player.health * exhaustedHealthPenalty);
+					}
+				}
+                if (Game1.player.exhausted.Value) // if exhausted
+                {
+                    Game1.player.stamina = Game1.player.stamina * exhaustedStaminaPenalty;
+                    if (Config.enableExhaustedHealth)
+                    {
+                        Game1.player.health = (int)Math.Ceiling(Game1.player.health * exhaustedHealthPenalty);
+                    }
+                }
+            }
+
+
+            // 5 Sanity Check for <1 or >max
+            if (Game1.player.stamina > Game1.player.MaxStamina)
             {
-				savedHealth = Game1.player.health;
-				savedStamina = (int)Game1.player.stamina;
-				Monitor.Log("Ending night with " + savedHealth + " Health and " + savedStamina + " Stamina.", (LogLevel)debugVal);
-			}
+                Game1.player.stamina = Game1.player.MaxStamina; 
+            }
+            if (Game1.player.stamina < 1)
+            {
+                Game1.player.stamina = 1; 
+            }
+            if (Game1.player.health > Game1.player.maxHealth)
+            {
+                Game1.player.health = Game1.player.maxHealth; 
+            }
+            if (Game1.player.health < 1)
+            {
+                Game1.player.health = 1; 
+            }
+
+
+            // 6 Log
+            if (Config.enableSleepVitals)
+            {
+                savedHealth = Game1.player.health;
+                savedStamina = Game1.player.stamina; 
+                Monitor.Log("Ending night with\n"
+                    + savedHealth + " Health\n" +
+                    savedStamina + " Stamina\n" +
+                    Game1.player.timeWentToBed.Value + "TimeWentToBed\n" +
+                    Game1.timeOfDay + " Current Time of Day\n" +
+                    Game1.player.exhausted.Value + " Played Exhausted?",
+                    (LogLevel)debugVal);
+            }
         }
 
-		private void PersistVitals()
+        private void RetainCurrentVitalsForSave()
         {
-			if (Config.enableSleepVitals)
+			savedHealth = Game1.player.health;
+			savedStamina = Game1.player.stamina; 
+				
+			Monitor.Log("Ending night with\n" + 
+				savedHealth + " Health\n" +
+				savedStamina + " Stamina",
+				(LogLevel)debugVal);
+        }
+
+		private void SaveVitals()
+        {
+			if (Config.enableMod) //If mod disabled, we wont overwrite the values for saving and let vanilla take over. This *should* let you disable it during a day and allow it to go away on save for your next day
             {
-				if (savedHealth != 0)
-				{
-					Game1.player.health = savedHealth;
-				}
-				if (savedStamina != 0)
-				{
-					Game1.player.stamina = savedStamina;
-				}
+				Game1.player.health = savedHealth;
+				Game1.player.stamina = savedStamina;
 			}
 		}
 
@@ -353,7 +456,7 @@ namespace FarmerVitalsReWrite
 
 		private void WorldReadyCheck()
         {
-			if (!Context.IsWorldReady || !Config.enableMod)
+			if (!Context.IsWorldReady || !Config.enableMod) 
 			{
 				return;
 			}

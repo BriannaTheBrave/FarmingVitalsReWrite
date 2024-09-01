@@ -46,7 +46,10 @@ namespace FarmerVitalsReWrite
 		public bool enableSleepVitals = true;
 		public int sleepHealthGain = 5;
 		public int sleepStaminaGain = 10;
-		public int exhaustedLoss = 50;
-		public bool enableExhaustedHealth = false;
-	}
+		//remove relative??
+		public bool exhaustedLossRelative = true; //Only lose this percentage of your "new day" vitals. Set to false to lose this percentage of your MAX vitals (be afraid)
+		public int exhaustedStaminaLoss = 50; //Exhaustion, max Late to bed, and pass out penalty if enableSleepVitals is true
+		public bool enableExhaustedHealth = false; //Applies the same logic to Health
+        public int exhaustedHealthLoss = 10;
+    }
 }
