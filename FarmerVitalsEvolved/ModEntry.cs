@@ -54,7 +54,6 @@ namespace FarmerVitalsReWrite
             Monitor.Log("New Day, Calculating Vitals...", (LogLevel)(debugVal*2));
 			CalculateMaxVitals();
 			ApplyNewMaxVitals();
-			//ApplyVitals(); //TODO dont need this anymore 
 		}
 
 		private void OnDayEnding(object sender, DayEndingEventArgs e)
@@ -103,22 +102,6 @@ namespace FarmerVitalsReWrite
 			Game1.player.maxStamina.Value += vitalsMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina." , (LogLevel)debugVal);
 		}
-
-		/*private void ApplyVitals()
-		{
-			if (Config.enableMod)
-			{
-
-			}
-			if (Config.enableSleepVitals)
-            {
-				ApplySleepVitals();
-            }
-            else
-            {
-				ApplyVanillaSleep();
-            }
-		}*/
 
 		private void RevertMaxVitals()
 		{
@@ -314,7 +297,8 @@ namespace FarmerVitalsReWrite
 		{
 			// 1 Update Max
 			// we wanna get any new maximums since we need to do sleep logic and them gains should count! -- only thing is they will miss out on the fighter+defender bonus
-            CalculateMaxVitals();
+			RevertMaxVitals();
+			CalculateMaxVitals();
             ApplyNewMaxVitals();
           
             //need to do some testing to be sure about all this...
