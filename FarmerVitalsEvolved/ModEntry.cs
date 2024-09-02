@@ -516,7 +516,7 @@ namespace FarmerVitalsReWrite
 			configMenu.AddBoolOption(
 				mod: ModManifest,
 				name: () => "Mod Enabled?",
-				tooltip: () => "You can disable the mod. Changes happen on the next day. Also useful before removing the mod - this allows the right values to be saved at the end of a day. Otherwise you'll have to wait an extra day for values to go back to normal",
+				tooltip: () => "You can disable the mod. Changes happen on the next day.\nAlso useful before removing the mod - this allows the right values to be saved at the end of a day\nMaximums are recalculated upon loading the game\nThis makes the mod easy to change and to remove\nThe current Health and Energy in the save file won't be changed by this mod, even if you remove it. This mod cannot time travel",
 				getValue: () => Config.enableMod,
 				setValue: value => Config.enableMod = value
 			);
@@ -528,11 +528,6 @@ namespace FarmerVitalsReWrite
                 getValue: () => Config.enableDebug,
 				setValue: value => Config.enableDebug = value	
 			);
-            configMenu.AddSectionTitle(
-                mod: ModManifest,
-                text: () => "Changes are applied when loading a save file.\nMaximums are recalculated at the start of each day - so even changing items and skill progression applies at the start of a day.\nThis means you can keep changing them to tweak them.\nAnything that happened at the end of the day (passing out, not healing, etc) still happened (this mod cannot time travel)",
-                tooltip: () => null
-            );
             // BASE VITALS PAGE
             configMenu.AddPageLink(
 				mod: ModManifest,
@@ -569,8 +564,8 @@ namespace FarmerVitalsReWrite
 			// ENABLE BASE VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Enabled",
-				tooltip: () => "Should we use these values or ignore them?",
+				name: () => "Base Changes?",
+				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableBaseVitals,
 				setValue: value => Config.enableBaseVitals = value
 			);
@@ -599,7 +594,7 @@ namespace FarmerVitalsReWrite
 			// ENABLE STARDROP VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "StarDrop Changes Enabled?",
+				name: () => "StarDrop Changes?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableStardropVitals,
 				setValue: value => Config.enableStardropVitals = value
@@ -629,7 +624,7 @@ namespace FarmerVitalsReWrite
 			// ENABLE IRIDIUM SNAKE MILK VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Snake Milk Changes Enabled?",
+				name: () => "Snake Milk Changes?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableSnakeMilkVitals,
 				setValue: value => Config.enableSnakeMilkVitals = value
@@ -659,13 +654,13 @@ namespace FarmerVitalsReWrite
 			// TITLE PROFESSION VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Combat Profession Vitals",
+				text: () => "Combat Professions",
 				tooltip: () => "Change Health gained from Fighter and Defender Professions."
 			);
 			// ENABLE PROFESSION VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Combat Profession Changes Enabled?",
+				name: () => "Combat Profession Changes?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableCombatProfessionVitals,
 				setValue: value => Config.enableCombatProfessionVitals = value
@@ -690,13 +685,13 @@ namespace FarmerVitalsReWrite
 			// TITLE FARMING VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Farming Skill Vitals",
+				text: () => "Farming Skill",
 				tooltip: () => "Gain Health and Energy from Farming Levels."
 			);
 			// ENABLE FARMING VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Farming Skill Gain Enabled?",
+				name: () => "Farming Skill Gain?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableFarmingVitals,
 				setValue: value => Config.enableFarmingVitals = value
@@ -720,13 +715,13 @@ namespace FarmerVitalsReWrite
 			// TITLE MINING VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Mining Skill Vitals",
+				text: () => "Mining Skill",
 				tooltip: () => "Gain Health and Energy from Mining Levels."
 			);
 			// ENABLE MINING VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Mining Skill Gain Enabled?",
+				name: () => "Mining Skill Gain?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableMiningVitals,
 				setValue: value => Config.enableMiningVitals = value
@@ -750,13 +745,13 @@ namespace FarmerVitalsReWrite
 			// TITLE FORAGING VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Foraging Skill Vitals",
+				text: () => "Foraging Skill",
 				tooltip: () => "Gain Health and Energy from Foraging Levels."
 			);
 			// ENABLE FORAGING VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Foraging Skill Gains Enabled?",
+				name: () => "Foraging Skill Gains?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableForagingVitals,
 				setValue: value => Config.enableForagingVitals = value
@@ -780,13 +775,13 @@ namespace FarmerVitalsReWrite
 			// TITLE FISHING VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Fishing Skill Vitals",
+				text: () => "Fishing Skill",
 				tooltip: () => "Gain Health and Energy from Fishing Levels."
 			);
 			// ENABLE FISHING VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Fishing Skill Gain Enabled?",
+				name: () => "Fishing Skill Gains?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableFishingVitals,
 				setValue: value => Config.enableFishingVitals = value
@@ -810,13 +805,13 @@ namespace FarmerVitalsReWrite
 			// TITLE COMBAT VITALS
 			configMenu.AddSectionTitle(
 				mod: ModManifest,
-				text: () => "Combat Skill Vitals",
+				text: () => "Combat Skill",
 				tooltip: () => "Gain Health and Energy from Combat Levels."
 			);
 			// ENABLE COMBAT VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Combat Skill Gains Enabled",
+				name: () => "Combat Skill Gains?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used",
 				getValue: () => Config.enableCombatVitals,
 				setValue: value => Config.enableCombatVitals = value
@@ -825,7 +820,7 @@ namespace FarmerVitalsReWrite
 			configMenu.AddBoolOption(
 				mod: ModManifest,
 				name: () => "Override Vanilla Health?",
-				tooltip: () => "Vanilla behavior gives (5) health every level except for levels (5 & 10).",
+				tooltip: () => "Vanilla behavior gives (5) health every level except for levels (5 & 10).\nWith this, you can gain Health per every level using 'Health Per Level'",
 				getValue: () => Config.overrideVanillaCombatHealth,
 				setValue: value => Config.overrideVanillaCombatHealth = value
 			);
@@ -833,7 +828,7 @@ namespace FarmerVitalsReWrite
 			configMenu.AddNumberOption(
 				mod: ModManifest,
 				name: () => "Health Per Level",
-				tooltip: () => "Only in effect if Override Vanilla Health is True",
+				tooltip: () => "Only in effect if Override Vanilla Health is True (Vanilla is 5)",
 				getValue: () => Config.combatHealthGain,
 				setValue: value => Config.combatHealthGain = value
 			);
@@ -860,7 +855,7 @@ namespace FarmerVitalsReWrite
 			// ENABLE SLEEP VITALS
 			configMenu.AddBoolOption(
 				mod: ModManifest,
-				name: () => "Sleep Changes Enabled?",
+				name: () => "Sleep Changes?",
 				tooltip: () => "If you Disable this, the values will be ignored and vanilla values will be used\nWhen Disabled, we come close to approximating the same behavior of Stamina recovery as Vanilla, but it isn't perfect, sorry",
 				getValue: () => Config.enableSleepVitals,
 				setValue: value => Config.enableSleepVitals = value
@@ -868,8 +863,8 @@ namespace FarmerVitalsReWrite
 			// SLEEP HEALTH GAIN
 			configMenu.AddNumberOption(
 				mod: ModManifest,
-				name: () => "Health % Restored (of your max) on sleep",
-				tooltip: () => "Between 0 and 100 (Vanilla is 100)",
+				name: () => "Health % Restored",
+				tooltip: () => "Between 0 and 100 (Vanilla is 100)\n This is the percentage (of your max) you will gain when you sleep",
 				min: 0,
 				max: 100,
 				interval: 1,
@@ -879,8 +874,8 @@ namespace FarmerVitalsReWrite
 			// SLEEP STAMINA VALUE
 			configMenu.AddNumberOption(
 				mod: ModManifest,
-				name: () => "Energy % Restored (of your max) on sleep",
-				tooltip: () => "Between 0 and 100 (Vanilla is 100)",
+				name: () => "Energy % Restored",
+				tooltip: () => "Between 0 and 100 (Vanilla is 100)\nThis is the percentage (of your max) you will gain when you sleep",
 				min: 0,
 				max: 100,
 				interval: 1,
@@ -890,8 +885,8 @@ namespace FarmerVitalsReWrite
 			// STAMINA EXHAUSTED PENALTY VALUE
 			configMenu.AddNumberOption(
 				mod: ModManifest,
-				name: () => "Exhausted Energy % Loss (relative to current values, not maximums)",
-				tooltip: () => "Between 0 and 100 (Vanilla is 50%)\nThis is the % you lose from being late (applies a penalty to Energy % Restored), exhaustion, and/or passing out",
+				name: () => "Exhausted Energy % Loss",
+				tooltip: () => "Between 0 and 100 (Vanilla is 50%)\nApplies a penalty to 'Energy % Restored' when you are late to bed (12am-2am)\nApplies a penalty to your current Energy if you have exhaustion and/or if you pass out (multiplicative)\nYou will always wake up with at least 1 Energy",
 				min: 0,
 				max: 100,
 				interval: 1,
@@ -901,16 +896,16 @@ namespace FarmerVitalsReWrite
             // ENABLE HEALTH PENALTY
             configMenu.AddBoolOption(
                 mod: ModManifest,
-                name: () => "Health Exhausted Penalty Changes Enabled?",
-                tooltip: () => "If you Enable this - Health will suffer exhausted loss just like stamina",
+                name: () => "Health Exhausted Penalty?",
+                tooltip: () => "If you Enable this - Health will suffer exhausted loss just like stamina! >:3 \n(Vanilla is false)",
                 getValue: () => Config.enableExhaustedHealth,
                 setValue: value => Config.enableExhaustedHealth = value
             );
             // HEALTH EXHAUSTED PENALTY VALUE
             configMenu.AddNumberOption(
                 mod: ModManifest,
-                name: () => "Exhausted Health % Loss (relative to current values, not maximums)",
-                tooltip: () => "Between 0 and 100 (Vanilla is 0%)\nThis is the % you lose from being late (applies a penalty to Health % Restored), exhaustion, and/or passing out",
+                name: () => "Exhausted Health % Loss",
+                tooltip: () => "Between 0 and 100 (Vanilla is 0%)\nApplies a penalty to 'Health % Restored' when you are late to bed (12am-2am)\nApplies a penalty to your current Health if you have exhaustion and/or if you pass out (multiplicative)\n You will always wake up with at least 1 HP",
                 min: 0,
                 max: 100,
                 interval: 1,
