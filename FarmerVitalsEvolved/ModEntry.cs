@@ -13,8 +13,8 @@ namespace FarmerVitalsReWrite
 
 		private int newMaxHealth;
 		private int newMaxStamina;
-		private int removeVanillaHealth;
-		private int removeVanillaStamina;
+		private int VanillaHealth;
+		private int VanillaStamina;
 		private int vitalsMaxHealth;
 		private int vitalsMaxStamina;
 		private int savedHealth;
@@ -91,23 +91,23 @@ namespace FarmerVitalsReWrite
 				CalculateProfessionVitals();
 			}
 
-			vitalsMaxHealth = newMaxHealth - removeVanillaHealth; //all this logic seems weird, but it exists to ensure config for enables can be on or off!
-			vitalsMaxStamina = newMaxStamina - removeVanillaStamina;
+			vitalsMaxHealth = newMaxHealth;// - removeVanillaHealth; 
+			vitalsMaxStamina = newMaxStamina;// - removeVanillaStamina;
 			VitalsSummary();
 		}
 
 		private void ApplyNewMaxVitals()
 		{
-            Game1.player.maxHealth += vitalsMaxHealth;
-			Game1.player.maxStamina.Value += vitalsMaxStamina;
+            Game1.player.maxHealth = vitalsMaxHealth;
+			Game1.player.maxStamina.Value = vitalsMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina." , (LogLevel)debugVal);
 		}
 
 		private void RevertMaxVitals()
 		{
-            Monitor.Log("Removing Vitals before saving...", (LogLevel)debugVal);
-			Game1.player.maxHealth -= vitalsMaxHealth;
-			Game1.player.maxStamina.Value -= vitalsMaxStamina;
+            Monitor.Log("Restoring Vanilla Vitals before saving...", (LogLevel)debugVal);
+			Game1.player.maxHealth = vanillaMaxHealth;
+			Game1.player.maxStamina.Value = vanillaMaxStamina;
             Monitor.Log("Player now has " + Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina.", (LogLevel)debugVal);
 		}
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -119,40 +119,35 @@ namespace FarmerVitalsReWrite
 			int baseMaxStamina = Config.baseMaxStamina;
 			newMaxHealth += baseMaxHealth;
 			newMaxStamina += baseMaxStamina;
-			removeVanillaHealth += vanillaMaxHealth;
-			removeVanillaStamina += vanillaMaxStamina;
+			VanillaHealth += vanillaMaxHealth;
+			VanillaStamina += vanillaMaxStamina;
             Monitor.Log("New base Vitals are " + baseMaxHealth + " Health and, " + baseMaxStamina + " Stamina.", (LogLevel)debugVal);
 		}
 
 		private void CalculateEventVitals()
 		{
-			if (Config.enableSnakeMilkVitals && Game1.player.mailReceived.Contains("qiCave"))
+			//ALWAYS CALC VANILLA
+            VanillaHealth += vanillaSnakeMilkHealth;
+			int numStardrops = Utility.numStardropsFound();
+			VanillaStamina += (numStardrops * vanillaStardropStamina);
+
+            if (Config.enableSnakeMilkVitals && Game1.player.mailReceived.Contains("qiCave"))
 			{
 				int snakeMilkHealthGain = Config.snakeMilkHealthGain;
 				int snakeMilkStaminaGain = Config.snakeMilkStaminaGain;
-				newMaxHealth += Config.snakeMilkHealthGain;
-				newMaxStamina += snakeMilkStaminaGain;
-				removeVanillaHealth += vanillaSnakeMilkHealth;
+				newMaxHealth += snakeMilkHealthGain;
+				newMaxStamina += snakeMilkStaminaGain;				
                 Monitor.Log("Iridium Snake Milk gave you " + snakeMilkHealthGain + " MaxHealth and, " + snakeMilkStaminaGain + " MaxStamina instead of " + vanillaSnakeMilkHealth + " MaxHealth.", (LogLevel)debugVal);
 			}
 
-			if (Config.enableStardropVitals && Game1.player.MaxStamina > vanillaMaxStamina)
+			if (Config.enableStardropVitals)
 			{
-				int extraStamina = Game1.player.MaxStamina - vanillaMaxStamina;
-				int stardropCount = extraStamina / vanillaStardropStamina;
-				int vanillaStardropStaminaTotal = stardropCount * vanillaStardropStamina;
-				int stardropHealth = stardropCount * Config.stardropHealthGain;
-				int stardropStamina = stardropCount * Config.stardropStaminaGain;
+				int stardropHealth = numStardrops * Config.stardropHealthGain;
+				int stardropStamina = numStardrops * Config.stardropStaminaGain;
 				newMaxHealth += stardropHealth;
 				newMaxStamina += stardropStamina;
-				removeVanillaStamina += vanillaStardropStaminaTotal;
-                Monitor.Log("If calculations are correct you have collected " + stardropCount.ToString() + " Stardrop(s)", (LogLevel)debugVal);
-                Monitor.Log("Stardrops are giving you " + stardropHealth + " MaxHealth and, " + stardropStamina + " MaxHealth instead of " + vanillaStardropStaminaTotal, (LogLevel)debugVal);
-				if (extraStamina != vanillaStardropStaminaTotal)
-                {
-					int staminaRemainder = extraStamina - vanillaStardropStaminaTotal;
-                    Monitor.Log(staminaRemainder.ToString() + " Stamina remaining after Stardrop calculations, are you getting stamina from other sources?", (LogLevel)3);
-				}
+                Monitor.Log("You have collected " + numStardrops.ToString() + " Stardrop(s)", (LogLevel)debugVal);
+                Monitor.Log("Stardrops are giving you " + stardropHealth + " MaxHealth and, " + stardropStamina + " MaxHealth instead of " + numStardrops * vanillaStardropStamina, (LogLevel)debugVal);
 			}
 		}
 
@@ -162,7 +157,7 @@ namespace FarmerVitalsReWrite
 			{
 				int fighterHealth = Config.fighterHealthGain;
 				newMaxHealth += fighterHealth;
-				removeVanillaHealth += vanillaFighterHealth;
+				VanillaHealth += vanillaFighterHealth;
                 Monitor.Log("The Fighter profession is giving you " + fighterHealth + " MaxHealth instead of " + vanillaFighterHealth + ".", (LogLevel)debugVal);
 			}
 
@@ -170,7 +165,7 @@ namespace FarmerVitalsReWrite
 			{
 				int defenderHealth = Config.defenderHealthGain;
 				newMaxHealth += defenderHealth;
-				removeVanillaHealth += vanillaDefenderHealth;
+				VanillaHealth += vanillaDefenderHealth;
                 Monitor.Log("The Defender profession is giving you " + defenderHealth + " MaxHealth instead of " + vanillaDefenderHealth + ".", (LogLevel)debugVal);
 			}
 		}
@@ -196,11 +191,8 @@ namespace FarmerVitalsReWrite
 			{
 				CalculateFishingVitals();
 			}
-
-			if (Config.enableCombatVitals)
-			{
-				CalculateCombatVitals();
-			}
+			//We always need combat vitals to run to get vanilla HP
+			CalculateCombatVitals();			
 		}
 
 		private void CalculateFarmingVitals()
@@ -245,50 +237,44 @@ namespace FarmerVitalsReWrite
 
 		private void CalculateCombatVitals()
 		{
-			int combatLevel = Game1.player.CombatLevel;
-			int combatStamina = (int)(combatLevel * Config.combatStaminaGain);
-			newMaxStamina += combatStamina;
-
-			if (Config.overrideVanillaCombatHealth == false)
+			int vitalsCombatLevel = Game1.player.CombatLevel;
+			int combatStamina = (int)(vitalsCombatLevel * Config.combatStaminaGain);
+			if (Config.enableCombatVitals)
 			{
-                Monitor.Log("Using vanilla combat health progression, 5 health gained every level except level 5 and 10", (LogLevel)1);
-                Monitor.Log("Combat Level " + combatLevel + " is giving you " + combatStamina + " MaxStamina.", (LogLevel)debugVal);
+				newMaxStamina += combatStamina;
+				Monitor.Log("Combat Level " + vitalsCombatLevel + " is giving you " + combatStamina + " MaxStamina.", (LogLevel)debugVal);
+			}
+
+            int vitalsCombatHealth = (int)(vitalsCombatLevel * Config.combatHealthGain);
+			int vanillaCombatLevel = vitalsCombatLevel;
+			
+			if (vanillaCombatLevel >= 10)
+			{
+				vanillaCombatLevel -= 2;
 			}
 			else
 			{
-				int combatHealth = (int)(combatLevel * Config.combatHealthGain);
-				int tempCombatLevel = combatLevel;
-				newMaxHealth += combatHealth;
-				if (tempCombatLevel >= 10)
+				if (vanillaCombatLevel >= 5)
 				{
-					tempCombatLevel -= 2;
+					vanillaCombatLevel -= 1;
 				}
-				else
-				{
-					if (tempCombatLevel >= 5)
-					{
-						tempCombatLevel -= 1;
-					}
-				}
-				int vanillaCombatHealth = tempCombatLevel * vanillaCombatHealthGain;
-				removeVanillaHealth += vanillaCombatHealth;
-                Monitor.Log("Combat Level " + combatLevel + " is giving you " + combatHealth + " MaxHealth and, " + combatStamina + " MaxStamina.", (LogLevel)debugVal);
-                Monitor.Log(vanillaCombatHealth.ToString() + " Health removed from Vanilla Combat progression", (LogLevel)debugVal);
 			}
+			int vanillaCombatHealth = vanillaCombatLevel * vanillaCombatHealthGain;
+			VanillaHealth += vanillaCombatHealth;
+
+			if (Config.overrideVanillaCombatHealth == false || Config.enableCombatVitals == false)
+			{
+				Monitor.Log("Using vanilla combat health progression, 5 health gained every level except level 5 and 10", (LogLevel)1);
+				newMaxHealth += vanillaCombatHealth;
+                Monitor.Log("Combat Level " + vitalsCombatLevel + " is giving you " + vanillaCombatHealth + " MaxHealth", (LogLevel)debugVal);
+            }
+			else
+			{
+                newMaxHealth += vitalsCombatHealth;
+                Monitor.Log("Combat Level " + vitalsCombatLevel + " is giving you " + vitalsCombatHealth + " MaxHealth", (LogLevel)debugVal);
+            }            
 		}
 
-		/*private void ApplySleepVitals()
-        {
-			            
-        }
-		private void ApplyVanillaSleep()
-        {
-			// MISSING EXHAUSTION LOGIC
-			float staminaPercent = Game1.player.stamina / (Game1.player.MaxStamina - vitalsMaxStamina);
-			int staminaRestore = (int)(Game1.player.MaxStamina * staminaPercent);
-			Game1.player.health = Game1.player.maxHealth;
-			Game1.player.stamina = staminaRestore;
-		}*/
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////// MISC METHODS //////////////////////////////////////////////////
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -297,7 +283,7 @@ namespace FarmerVitalsReWrite
 		{
 			// 1 Update Max
 			// we wanna get any new maximums since we need to do sleep logic and them gains should count! -- only thing is they will miss out on the fighter+defender bonus
-			RevertMaxVitals();
+			//RevertMaxVitals();
 			CalculateMaxVitals();
             ApplyNewMaxVitals();
           
@@ -434,8 +420,8 @@ namespace FarmerVitalsReWrite
 		{
 			newMaxHealth = 0;
 			newMaxStamina = 0;
-			removeVanillaHealth = 0;
-			removeVanillaStamina = 0;
+			VanillaHealth = 0;
+			VanillaStamina = 0;
 		}
 
 		private void WorldReadyCheck()
@@ -463,10 +449,10 @@ namespace FarmerVitalsReWrite
 			WorldReadyCheck();
 			if (debugVal == 1)
             {
-				Monitor.Log(Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina before calculations.", (LogLevel)debugVal);
-				Monitor.Log(removeVanillaHealth + " Vanilla MaxHealth removed, " + removeVanillaStamina + " Vanilla MaxStamina removed.", (LogLevel)debugVal);
-				Monitor.Log(newMaxHealth + " MaxHealth added, " + newMaxStamina + " MaxStamina added.", (LogLevel)debugVal);
-				Monitor.Log(vitalsMaxHealth + " MaxHealth difference, " + vitalsMaxStamina + "  MaxStamina difference.", (LogLevel)debugVal);
+				//Monitor.Log(Game1.player.maxHealth + " MaxHealth and, " + Game1.player.MaxStamina + " MaxStamina before calculations.", (LogLevel)debugVal);
+				//Monitor.Log(VanillaHealth + " Vanilla MaxHealth removed, " + VanillaStamina + " Vanilla MaxStamina removed.", (LogLevel)debugVal);
+				Monitor.Log(newMaxHealth + " MaxHealth, " + newMaxStamina + " MaxStamina", (LogLevel)debugVal);
+				//Monitor.Log(vitalsMaxHealth + " MaxHealth difference, " + vitalsMaxStamina + "  MaxStamina difference.", (LogLevel)debugVal);
 			}
 		}
 		private void ApplyConfig()
